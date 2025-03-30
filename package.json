@@ -1,11 +1,19 @@
 {
   "name": "tic_tac_toe",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "http-server"
+    "dev": "vite",
+    "build": "tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.4"
+  },
+  "devDependencies": {
+    "typescript": "~5.7.2",
+    "vite": "^6.2.0"
   },
   "repository": {
     "type": "git",
@@ -16,8 +24,5 @@
   "bugs": {
     "url": "https://github.com/c6z3h/tic_tac_toe/issues"
   },
-  "homepage": "https://github.com/c6z3h/tic_tac_toe#readme",
-  "devDependencies": {
-    "http-server": "^14.1.1"
-  }
+  "homepage": "https://github.com/c6z3h/tic_tac_toe#readme"
 }

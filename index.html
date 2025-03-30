@@ -6,32 +6,23 @@
     </head>
     <body>
         <div class="container">
-            <h1>Hello!</h1>
-            <div class="gameGrid">
-                <div>
-                    <button></button>
-                    <button></button>
-                    <button></button>
-                </div>
-                <div>
-                    <button></button>
-                    <button></button>
-                    <button></button>
-                </div>
-                <div>
-                    <button></button>
-                    <button></button>
-                    <button></button>
-                </div>
+            <div style="flex-direction: row; display: flex">
+                <h1>Hello! You are:</h1>
+                <h1 id="userId"></h1>
             </div>
+            <div class="gameGrid">
+                <button id="cell-0"></button>
+                <button id="cell-1"></button>
+                <button id="cell-2"></button>
+                <button id="cell-3"></button>
+                <button id="cell-4"></button>
+                <button id="cell-5"></button>
+                <button id="cell-6"></button>
+                <button id="cell-7"></button>
+                <button id="cell-8"></button>
+            </div>
+            <div id="app"></div>
+            <script type="module" src="./src/main.ts"></script>
         </div>
     </body>
-    <script>
-        const buttons = document.querySelectorAll('button');
-        buttons.forEach((button, index) => {
-            button.addEventListener('click', function() {
-                alert(`button ${index} clicked!`);
-            })
-        })
-    </script>
 </html>
