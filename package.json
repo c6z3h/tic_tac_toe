@@ -1,0 +1,23 @@
+{
+  "name": "tic_tac_toe",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "http-server"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c6z3h/tic_tac_toe.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/c6z3h/tic_tac_toe/issues"
+  },
+  "homepage": "https://github.com/c6z3h/tic_tac_toe#readme",
+  "devDependencies": {
+    "http-server": "^14.1.1"
+  }
+}
