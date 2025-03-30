@@ -2,6 +2,7 @@
 <html>
     <head>
         <title>TT & PP's Tic Tac Toe!</title>
+        <link rel="stylesheet" href="styles.css" />
     </head>
     <body>
         <div class="container">
@@ -29,7 +30,7 @@
         const buttons = document.querySelectorAll('button');
         buttons.forEach((button, index) => {
             button.addEventListener('click', function() {
-                console.log('button ', index, ' clicked!');
+                alert(`button ${index} clicked!`);
             })
         })
     </script>
