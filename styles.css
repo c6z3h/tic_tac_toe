@@ -16,9 +16,26 @@ button {
     cursor: pointer;
 }
 
+button:hover {
+    background-color: aquamarine;
+}
+
 .gameGrid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     width: min(90vw, 400px); /* Responsive width (90% of screen, max 400px) */
     /* margin: auto; */
+}
+
+.restartButton {
+    border-radius: 8px;
+    margin-top: 20px;
+    padding: 20px;
+    background-color: gold;
+    border: 2px solid firebrick;
+    cursor: pointer;
+}
+
+.restartButton:hover {
+    background-color: bisque;
 }

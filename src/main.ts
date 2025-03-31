@@ -7,16 +7,13 @@ const supabaseAnonKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYm
 const supabase = createClient(supabaseUrl, supabaseAnonKey);
 const table_name = 'record';
 const channel = supabase.channel(`public:${table_name}`)
-const gameLobbyChannel = supabase.channel(`public:game_lobby`);
 
 // Game state
-// let currentPlayer: string = "X";
 const board: (string | null)[] = Array(9).fill(null); // 3x3 grid
 let isGameOver = false;
 let canMove = true;
 
 // Start game
-joinGame();
 subscribeToUpdates();
 
 interface INewPayload {
@@ -28,14 +25,65 @@ interface INewPayload {
 
 // 2️⃣ Subscribe to Realtime Changes
 function subscribeToUpdates() {
+  let players: string[] = [];
   channel
     .on('postgres_changes' as unknown as 'system', { event: 'INSERT', schema: 'public', table: table_name }, (payload) => {
       const newUpdate = payload?.new as INewPayload;
-      updateUI(newUpdate);
+      updateUI({res: newUpdate});
       canMove = newUpdate.player !== localStorage.getItem('playerSymbol');
       console.log('canMove', canMove)
     })
-    .subscribe();
+    .subscribe((status) => {
+      if (status === "SUBSCRIBED") {
+          console.log("Connected to game_lobby");
+          const userName = document.getElementById(`userId`) as HTMLHeadingElement;
+          userName.textContent = ' X';
+
+          channel.send({
+              type: "broadcast",
+              event: "player_joined",
+              payload: { players: [...players, crypto.randomUUID()] },
+          });
+
+          // Assign 'X' to first player, 'O' to second
+          localStorage.setItem("playerSymbol", players.length === 0 ? "X" : "O");
+      }
+  });
+
+  channel.on("broadcast", { event: "player_joined" }, ({ payload }) => {
+    updatePlayers(payload.players);
+  });
+
+  channel.on("broadcast", { event: "request_restart" }, () => {
+    const isAccepted = confirm('Opponent requested to restart, accept?');
+    if (isAccepted) {
+      // re-init game
+      board.fill(null);
+      updateUI({isReset: true})
+      isGameOver = false;
+      canMove = true;
+      // broadcast to other client to let him re-set too
+      channel.send({
+        type: "broadcast",
+        event: "immediate_reset",
+      })
+    }
+  });
+
+  channel.on("broadcast", { event: 'immediate_reset' }, () => {
+    // re-init game
+    board.fill(null);
+    updateUI({isReset: true})
+    isGameOver = false;
+    canMove = true;
+  })
+}
+
+function updatePlayers(playersList: any[]) {
+  console.log("Updated Players List:", playersList);
+  localStorage.setItem('playerSymbol', 'O');
+  const userName = document.getElementById(`userId`) as HTMLHeadingElement;
+  userName.textContent = ' O';
 }
 
 // 3️⃣ Handle Player Moves
@@ -52,8 +100,19 @@ async function handleMove(index: number) {
   }
 }
 // 4️⃣ Update UI Based on Database Changes
-function updateUI(res: INewPayload) {
-  const { grid_index, player } = res || {};
+interface IUpdateUI {
+  res?: INewPayload;
+  isReset?: boolean;
+}
+function updateUI({res, isReset}: IUpdateUI) {
+  if (isReset) {
+    document.querySelectorAll("button").forEach((button) => {
+      button.textContent = null;
+    })
+    return;
+  }
+
+  const { grid_index, player } = res as INewPayload;
   const cell = document.getElementById(`cell-${grid_index}`) as HTMLButtonElement;
   
   if (cell && player) {
@@ -67,39 +126,6 @@ function updateUI(res: INewPayload) {
 document.querySelectorAll("button").forEach((button, index) => {
   button.addEventListener("click", () => handleMove(index));
 });
-
-// 6️⃣ Assign Players Using Realtime WebSockets
-async function joinGame() {
-  let players: string[] = [];
-
-  gameLobbyChannel.subscribe((status) => {
-      if (status === "SUBSCRIBED") {
-          console.log("Connected to game_lobby");
-          const userName = document.getElementById(`userId`) as HTMLHeadingElement;
-          userName.textContent = ' X';
-
-          gameLobbyChannel.send({
-              type: "broadcast",
-              event: "player_joined",
-              payload: { players: [...players, crypto.randomUUID()] },
-          });
-
-          // Assign 'X' to first player, 'O' to second
-          localStorage.setItem("playerSymbol", players.length === 0 ? "X" : "O");
-      }
-  });
-
-  gameLobbyChannel.on("broadcast", { event: "player_joined" }, ({ payload }) => {
-    updatePlayers(payload.players);
-  });
-}
-
-function updatePlayers(playersList: any[]) {
-  console.log("Updated Players List:", playersList);
-  localStorage.setItem('playerSymbol', 'O');
-  const userName = document.getElementById(`userId`) as HTMLHeadingElement;
-  userName.textContent = ' O';
-}
 
 // 7️⃣ Check Win Condition
 function checkWinCondition() {
@@ -124,3 +150,21 @@ function checkWinCondition() {
       isGameOver = true;
   }
 }
+
+/**
+ * Restart:
+ * 1. allow if isGameOver = true;
+ * 2. will send trigger to player 2
+ * 3. will restart if player 2 accept
+ * 4. otherwise end
+ */
+document.getElementById("restartButton")?.addEventListener("click", () => {
+  if (!isGameOver) {
+    return;
+  }
+  channel.send({
+    type: "broadcast",
+    event: "request_restart",
+    // payload: ,
+  });
+})
