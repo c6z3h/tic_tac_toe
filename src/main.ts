@@ -10,7 +10,7 @@ const channel = supabase.channel(`public:${table_name}`)
 const gameLobbyChannel = supabase.channel(`public:game_lobby`);
 
 // Game state
-let currentPlayer: string = "X";
+// let currentPlayer: string = "X";
 const board: (string | null)[] = Array(9).fill(null); // 3x3 grid
 let isGameOver = false;
 let canMove = true;
